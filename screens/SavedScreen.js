@@ -34,6 +34,9 @@ componentDidMount(){
   });
   Firebase.database().ref('UsersList/' + uid).on('value', snapshot => {
     this.setState({ SavedItem: snapshot.val().savedlist })
+    if(snapshot.val().savedlist=='new'){
+      this.setState({SavedItem:[]})
+    }
   })
   setTimeout(() => {
     this.setState({

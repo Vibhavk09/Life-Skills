@@ -1,297 +1,237 @@
 import React from "react";
-import {
-  StyleSheet,
-  FlatList,
-  Dimensions,
-  TouchableOpacity,
-  TouchableHighlight,
-  ToastAndroid,
-  View,
-  ActivityIndicator,
-} from "react-native";
-import { Searchbar } from "react-native-paper";
+import { StyleSheet, FlatList, Dimensions, TouchableOpacity, ToastAndroid, View, Image } from "react-native";
 import Loader from "../../Loader";
-import { Card, Colors, Title, ToggleButton } from "react-native-paper";
-import RNUrlPreview from "react-native-url-preview";
-const { width, height } = Dimensions.get("screen");
+import { Text, Card, Colors, Title, ToggleButton, Paragraph, Button } from "react-native-paper";
 import Firebase from "../../../firebase";
-import { Block } from "galio-framework";
 import { withNavigation } from "react-navigation";
 import _ from 'lodash'
-import { contains } from "react-native-redash";
 let userid;
 export default withNavigation(
   class Home extends React.Component {
     constructor(props) {
-      super(props);
+      super(props)
       this.state = {
-        NewsData: [],
         SavedData: [],
-        searchQuery: "",
         hio: [],
         loading: false,
-        listloading: false, // user list loading
         isRefreshing: false, 
-      };
-    }
-    onChangeSearch = (query) => {
-      this.setState({ searchQuery: query });
-    };
-
-    openWebView = (uri) => {
-      this.props.navigation.navigate('WebViewScreen', { uri: uri });
-      console.log(uri)
+        InfoData: [],
+        top: false
+      }
     }
     
-    componentDidMount() {
+    componentDidMount(){
       this.setState({
         loading: true,
       });
-      const { uid } = Firebase.auth().currentUser;
-      userid = uid;
-      Firebase.database()
-        .ref("/topiclist/")
-        .once("value", (snapshot) => {
-          this.setState({ NewsData: snapshot.val() });
-        });
+
+      const { uid } = Firebase.auth().currentUser
+      userid = uid
+
       Firebase.database()
         .ref("UsersList/" + uid + "/topiclist/")
         .on("value", (snapshot) => {
-          const hio = snapshot.val().map((element) => {
-            if (element.selected) {
-              const temp = element.name;
-              return temp;
-            }
-          });
-          this.setState({ hio });
-          setTimeout(() => {
-            this.setState({
-              loading: false,
-            });
-          }, 2500);
-        });
+            const hio = snapshot.val().map((element) => {
+              if (element.selected) {
+                const temp = element.name
+                  return temp
+              }
+            })
+            this.setState({ hio }); 
+      })
+      Firebase.database()
+        .ref("TopicsData/")
+        .on("value", (snapshot) => {
+          this.setState({ InfoData : snapshot.val() })
+        })
+
+      setTimeout(() => {
+        this.setState({
+          loading: false,
+        })
+      }, 2500);
+    }
+
+    openWebView = (uri) => {
+      this.props.navigation.navigate('WebViewScreen', { uri: uri });
     }
 
     savelist = (props) => {
-      console.log("hi");
-
       Firebase.database()
         .ref("UsersList/" + userid + "/savedlist/")
         .once("value", (snapshot) => {
           if (snapshot.val() === "new" || snapshot.val() === null) {
             this.state.SavedData.push(props);
+
             Firebase.database()
               .ref("UsersList/" + userid)
               .update({
                 savedlist: this.state.SavedData,
               });
+
             ToastAndroid.showWithGravityAndOffset(
               "Added to Saved List",
               ToastAndroid.LONG,
               ToastAndroid.BOTTOM,
               25,
               50
-            );
-          } else {
+            )
+
+          } 
+          else {
             this.setState({ SavedData: snapshot.val() });
             const arrayitem = snapshot
               .val()
-              .filter((itm) => itm.id !== props.id);
-            arrayitem.push(props);
+              .filter((itm) => itm.DataArray.id !== props.DataArray.id)
+            arrayitem.push(props)
+
             Firebase.database()
               .ref("UsersList/" + userid)
               .update({
                 savedlist: arrayitem,
-              });
-            this.setState({ SavedData: [] });
+            })
+            this.setState({ SavedData: [] })
             ToastAndroid.showWithGravityAndOffset(
               "Added to Saved List",
               ToastAndroid.SHORT,
               ToastAndroid.BOTTOM,
               25,
               50
-            );
+            )
           }
-        });
-    };
+      })
+    }
 
 
     renderItem = ({item}) => {
-      if(this.state.hio.includes(item.topic)){
+      if(this.state.hio.includes(item.DataArray.contentType)){
         return( 
           <Card style={styles.card}>
-          <Card.Title
-            key={item.id}
-            title={item.topic}
-            titleStyle={styles.titlecard}
-            right={(props) => (
-              <ToggleButton
-                icon="heart"
-                color={Colors.pink300}
-                //  status={item.Saved}
-                onPress={() => this.savelist(item)}
-              ></ToggleButton>
-            )}
-            rightStyle={styles.righticon}
-            style={styles.cardsty}
-          />
-        
-          <TouchableOpacity style={{ flex: 1 }} onPress={() => { this.openWebView(item.link); console.log('clicked'); }}>
-          <Card.Content style={styles.styleurl} pointerEvents="none">
-            <ActivityIndicator
-              style={styles.loadcards}
-              size="large"
-              color="#741cc7"
-            />
-
-            <RNUrlPreview
-              text={item.link}
-              titleStyle={styles.linktitle}
-              containerStyle={styles.linkcontainer}
-              titleNumberOfLines={3}
-              imageStyle={styles.imagesty}
-              descriptionStyle={styles.linkimage}
-            />
-            <RNUrlPreview
-              text={item.link}
-              title={false}
-              containerStyle={styles.linkcontainer}
-              imageStyle={styles.linkimage}
-              descriptionStyle={styles.discript}
-              descriptionNumberOfLines={4}
-            />
-          </Card.Content>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={() => { this.openWebView(item.DataArray.url) }}>
+              <Card.Cover source={{ uri: item.DataArray.images[0] }} blurRadius={1}/>
+              <Card.Content >
+                <Title style={styles.titlecard}>{item.DataArray.title}</Title>
+                <Paragraph style={styles.paracard}>{item.DataArray.description}</Paragraph>
+              </Card.Content>
+              <Card.Actions>
+                <Button>#{item.DataArray.contentType}</Button>
+                <ToggleButton
+                  style={styles.righticon}
+                  icon="heart"
+                  color={Colors.pink300}
+                  onPress={() => this.savelist(item)}
+                ></ToggleButton>
+              </Card.Actions>
+            </TouchableOpacity>
         </Card>
-        )}
+      )}
     }
     
     onRefresh() {
       this.setState({isRefreshing:true})
-      Firebase.database()
-            .ref("/topiclist/")
-            .once("value", (snapshot) => {
-              this.setState({NewsData:snapshot.val()})
-         
-    
-          var currentIndex = this.state.NewsData.length, temporaryValue, randomIndex;
-          console.log(currentIndex)
-          let array = this.state.NewsData
-          while (0 !== currentIndex) {
-    
-            // Pick a remaining element...
-            randomIndex = Math.floor(Math.random() * currentIndex);
-            currentIndex -= 1;
-        
-            // And swap it with the current element.
-            temporaryValue = array[currentIndex];
-            array[currentIndex] = array[randomIndex];
-            array[randomIndex] = temporaryValue;
-          }
-          this.setState({NewsData:array})
-        })
-          this.setState({isRefreshing:false})
-    
+      var currentIndex = this.state.InfoData.length, temporaryValue, randomIndex;
+      let array = this.state.InfoData
+      while (0 !== currentIndex) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+      }
+      this.setState({InfoData:array})
+      this.setState({isRefreshing:false})
     }
-    renderFooter = () => {
-      //it will show indicator at the bottom of the list when data is loading otherwise it returns null
-        if (!this.state.listloading) return null;
-       return (
-         <ActivityIndicator
-           style={{ color: '#000' }}
-         />
-       );
-     };
-     handleLoadMore = () => {
-      this.setState({isRefreshing:true})
-    };
+
+    upButtonHandler = () => {
+      this.ListView_Ref.scrollToOffset({ offset: 0,  animated: true });
+      this.setState({ top: false})
+    }
 
     render() {
       const { searchQuery } = this.state;
       return (
         <View style={styles.Container}>
           <Loader loading={this.state.loading} />
-          <Searchbar
-            style={styles.search}
-            placeholder="Search"
-            onChangeText={(text) => this.onChangeSearch(text)}
-            value={searchQuery}
-          />
+          
           <FlatList
-            data={this.state.NewsData}
-            keyExtractor={(item) => item.id.toString()}
+            data={this.state.InfoData}
+            keyExtractor={(item) => item.DataArray.id.toString()}
             showsVerticalScrollIndicator={false}
-            initialNumToRender={10}
             refreshing={this.state.isRefreshing}
             onRefresh={this.onRefresh.bind(this)}
-            getItemLayout={(data, index) => (
-              {length: height*0.24, offset: height*0.24 * index, index}
-            )}     
-            ListFooterComponent={this.renderFooter.bind(this)}
+            //onScrollBeginDrag={() => this.setState({ top: true})}
+            //onScroll={() => this.setState({ top: true})}
+            
+            onScrollToTop={() => this.setState({ top: false})}
+            onMomentumScrollBegin={() => this.setState({ top: true})}
+
+            ref={(ref) => {
+              this.ListView_Ref = ref;
+            }}
             renderItem={this.renderItem}  
-            onEndReachedThreshold={0.4}
-             onEndReached={this.handleLoadMore.bind(this)}
-           
-          />
+            onEndThreshold={0}
+          /> 
+          {this.state.top &&<TouchableOpacity
+            activeOpacity={0.8}
+            onPress={this.upButtonHandler}
+            style={styles.upButton}>
+              <Image
+                source={{
+                  uri:
+                    'https://upload-icon.s3.us-east-2.amazonaws.com/uploads/icons/png/13543369451543238868-512.png',
+                }}
+                style={styles.upButtonImage}
+              />
+              <Text>Top</Text>
+          </TouchableOpacity>}
         </View>
-      );
+      )
     }
   }
-);
+)
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   card: {
     margin: 10,
-    paddingLeft: 10,
-    paddingRight: 10,
-    height: height * 0.24,
+    borderRadius:5
   },
   titlecard: {
-    fontSize: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#D3D3D3",
+    top:-130,
+    fontSize: 22,
+    color:'#fff',
+    position:'absolute',
+    fontWeight:"bold",
+    lineHeight: 25,
+    letterSpacing:1,
+    right:10,
+    textShadowColor:'black',
+    textShadowOffset:{width: 1, height: 1},
+    textShadowRadius:20,
   },
-  righticon: {},
-  cardsty: {
-    marginTop: -16,
-    marginBottom: -16,
+  paracard: {
+    paddingTop:10,
+    lineHeight: 17,
+    letterSpacing:0.7,
   },
-  linktitle: {
-    fontWeight: "bold",
-    //  width:width
+  righticon: {
+    right:10,
+    position:"absolute"
   },
-  linkcontainer: {
-    backgroundColor: "#fff",
-    //   flex: 1,
-    //  // flexDirection: "row",
-    //   flexWrap: "wrap",
+  upButtonImage: {
+    resizeMode: 'contain',
+    width: 30,
+    height: 30,
   },
-  linkimage: {
-    //alignItems: 'flex-end' ,
-    // flexDirection: 'row',
-    //  justifyContent: 'flex-start' ,
-    display: "none",
+  upButton: {
+    position: 'absolute',
+    backgroundColor: '#fff',
+    borderRadius:50,
+    opacity: 0.7,
+    width: 50,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    right: 30,
+    bottom: 70,
   },
-  imagesty: {
-    width: 80,
-  },
-  discript: {
-    //dont remove
-  },
-  styleurl: {
-    flex: 1,
-    flexDirection: "column",
-  },
-  loadcards: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
+})

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, Dimensions, ImageBackground, Image, StatusBar } from "react-native";
+import { TouchableOpacity, View, StyleSheet, Dimensions, ImageBackground, Image, StatusBar } from "react-native";
 import AppIntroSlider from 'react-native-app-intro-slider';
 import { argonTheme } from "../constants";
 import slides from "./Slides"
@@ -73,10 +73,18 @@ export default class IntroScreen extends React.Component {
                 <Button
                   style={styles.button}
                   color={argonTheme.COLORS.INTRO}
+                 // color={'transparent'}
                   onPress={() => this.setState({ showRealApp: true })}
                   textStyle={{ color: argonTheme.COLORS.BLACK }}
                 >
-                  Get Started
+                  <Text style={{ 
+                    fontSize:20,  
+                    letterSpacing:1,
+                    textShadowColor:'white',
+                    textShadowOffset:{width: 0, height: 0},
+                    textShadowRadius:20,  
+                    fontWeight: '700' 
+                    }} >Welcome</Text>
                 </Button>
               </Block>
             </Block>
@@ -149,6 +157,7 @@ const styles = StyleSheet.create({
     shadowRadius: 0,
     shadowOpacity: 0,
     //fontWeight: "800",
+    textAlign:"center",
     marginTop: 60,
     fontSize: 18
   },

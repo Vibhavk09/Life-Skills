@@ -1,59 +1,64 @@
-import React from "react";
-import { StyleSheet, Dimensions, StatusBar, ImageBackground } from "react-native";
+import React from "react" 
+import { StyleSheet, Dimensions, StatusBar, ImageBackground } from "react-native" 
 import Home from "./components/index"
-import { Block } from "galio-framework";
-import AnimatedSplash from "react-native-animated-splash-screen";
-const { width, height } = Dimensions.get("screen");
-import Constants from 'expo-constants';
+import { Block, Text } from "galio-framework" 
+const { width, height } = Dimensions.get("screen") 
+import Constants from 'expo-constants' 
 
 export default class HomeScreen extends React.Component {
-  
-
-  componentDidMount() {
+  async componentDidMount() {
     this.Onboarding = require("../../assets/backbg.jpg")
   }
 
-
   render() {
-  
     return (
-
       <Block flex center>
         <StatusBar 
-        translucent={true} 
-        backgroundColor={'transparent'} />
-
+          translucent={true} 
+          backgroundColor={'transparent'} 
+        />
+       
         <ImageBackground
           source={require("../../assets/backbg.jpg")}
           style={styles.profileContainer}
           imageStyle={styles.profileBackground}
         >
+          <Block style={{ 
+            backgroundColor:'#1699e0', 
+            height: height*0.1, 
+            paddingTop: Constants.statusBarHeight,
+            justifyContent:'center'
+            }}>
+          
+            <Text style={{ 
+              fontWeight: 'bold',
+              fontSize: 24,
+              position:'relative',
+              color:'#fff',
+              letterSpacing:1,
+              textAlign:'center',
+              textShadowColor:'black',
+              textShadowOffset:{width: 0, height: 0},
+              textShadowRadius:20, 
+              }}>Life Skills</Text>
+          </Block>
+
           <Block middle>
-            
               <Block style={styles.cards}>
                 <Home />
               </Block>
-            
           </Block>
+        
         </ImageBackground>
       </Block>
     )
   }
 }
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  search: {
-    marginTop: width * 0.1,
-    marginBottom: width * 0.07,
-    borderRadius: 50,
-    width: width * 0.9
-  },
   cards: {
     width: width * 0.9,
     height: height * 0.85,
-    marginTop: Constants.statusBarHeight
+   
   },
   profileContainer: {
     width: width,
@@ -64,6 +69,5 @@ const styles = StyleSheet.create({
   profileBackground: {
     width: width,
     height: height,
-    
-  },
-});
+  }
+})

@@ -14,15 +14,24 @@ import { Button } from "../../components";
 const { width, height } = Dimensions.get("screen");
 import Catlist from "../Catlist"
 export default class ProfileScreen extends React.Component {
-  state = { email: "", displayName: "", loadpic: true };
+  state = { email: "", displayName: "", photoURL: "", loadpic: true };
   signOutUser = () => {
     Firebase.auth().signOut();
   };
   componentDidMount() {
-    const { email, displayName } = Firebase.auth().currentUser;
+    const { email, displayName, photoURL } = Firebase.auth().currentUser;
     this.Onboarding = require("../../assets/backbg.jpg")
     this.Exit = require("../../assets/exit.png");
     this.setState({ email, displayName });
+   
+    if(photoURL){
+      this.setState({ photoURL });
+    }else{
+      this.setState({ photoURL:"https://api.adorable.io/avatars/124/" + displayName + ".png" });
+    }
+
+
+
   }
 
   render() {
@@ -48,13 +57,15 @@ export default class ProfileScreen extends React.Component {
 
             <Block flex style={styles.profileCard}>
               <Block middle style={styles.avatarContainer}>
+              {this.state.loadpic &&<ActivityIndicator  size="large" color="#741cc7"/> }
                 <Image
-                  source={{ uri: "https://api.adorable.io/avatars/124/" + this.state.displayName + ".png" }}
+                  source={{ 
+                    uri: this.state.photoURL }}
                   style={styles.avatar}
                   onLoadEnd={ ()=>{ this.setState({ loadpic: false })}}
                   />
                     
-            {this.state.loadpic &&<ActivityIndicator  size="large" color="#741cc7"/> }
+           
               </Block>
 
               <Block flex>
@@ -116,13 +127,12 @@ const styles = StyleSheet.create({
   avatarContainer: {
     position: "absolute",
     marginTop: -80,
-    alignSelf: "center"
+    alignSelf: "center",
   },
   avatar: {
     width: 124,
     height: 124,
     borderRadius: 62,
-    borderWidth: 2,
     borderColor: '#fff'
   },
   nameInfo: {

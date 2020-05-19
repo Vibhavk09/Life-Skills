@@ -15,19 +15,19 @@ export default class MyComponent extends React.Component {
         key: "home",
         title: "Home",
         icon: "home",
-        color: "#1699e0",
+        color: "#942de3",
       },
       {
         key: "heart",
         title: "Saved",
         icon: "heart",
-        color: "#009688",
+        color: "#1699e0",
       },
       {
         key: "profile",
         title: "Profile",
         icon: "face-profile",
-        color: "#741cc7",
+        color: "#b026ff",
       },
     ],
   };

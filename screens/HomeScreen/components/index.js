@@ -38,12 +38,17 @@ export default withNavigation(
               }
             })
             this.setState({ hio }); 
-      })
+
+         
       Firebase.database()
         .ref("TopicsData/")
-        .on("value", (snapshot) => {
-          this.setState({ InfoData : snapshot.val() })
+        .once("value", (snapshot) => {
+          const result = snapshot.val().filter((itm) => this.state.hio.includes(itm.DataArray.contentType) )
+          this.setState({ InfoData : result })
         })
+
+      })
+
 
       setTimeout(() => {
         this.setState({
@@ -104,7 +109,6 @@ export default withNavigation(
 
 
     renderItem = ({item}) => {
-      if(this.state.hio.includes(item.DataArray.contentType)){
         return( 
           <Card style={styles.card}>
             <TouchableOpacity onPress={() => { this.openWebView(item.DataArray.url) }}>
@@ -124,7 +128,7 @@ export default withNavigation(
               </Card.Actions>
             </TouchableOpacity>
         </Card>
-      )}
+      )
     }
     
     onRefresh() {
@@ -148,7 +152,6 @@ export default withNavigation(
     }
 
     render() {
-      const { searchQuery } = this.state;
       return (
         <View style={styles.Container}>
           <Loader loading={this.state.loading} />
@@ -159,9 +162,6 @@ export default withNavigation(
             showsVerticalScrollIndicator={false}
             refreshing={this.state.isRefreshing}
             onRefresh={this.onRefresh.bind(this)}
-            //onScrollBeginDrag={() => this.setState({ top: true})}
-            //onScroll={() => this.setState({ top: true})}
-            
             onScrollToTop={() => this.setState({ top: false})}
             onMomentumScrollBegin={() => this.setState({ top: true})}
 

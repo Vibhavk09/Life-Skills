@@ -1,6 +1,6 @@
 {
   "urlRandomness": "mm-s7v",
-  "hostType": "localhost",
+  "hostType": "lan",
   "lanType": "ip",
   "dev": true,
   "minify": false,
